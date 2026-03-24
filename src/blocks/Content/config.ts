@@ -5,9 +5,11 @@ import {
   HeadingFeature,
   InlineToolbarFeature,
   lexicalEditor,
+  TextStateFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { link } from '@/fields/link'
+import { textStateConfig } from '@/fields/textStateConfig'
 
 const columnFields: Field[] = [
   {
@@ -43,6 +45,11 @@ const columnFields: Field[] = [
           HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
           FixedToolbarFeature(),
           InlineToolbarFeature(),
+          TextStateFeature({
+            state: {
+              color: textStateConfig.color,
+            },
+          }),
         ]
       },
     }),

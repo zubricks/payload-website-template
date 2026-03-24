@@ -21,10 +21,19 @@ import type {
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
+import { textStateConfig } from '@/fields/textStateConfig'
 
 type NodeTypes =
   | DefaultNodeTypes
   | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
+
+// Lexical serializes node state under the "$" key.
+const NODE_STATE_KEY = '$'
+
+// React style prop requires camelCase, but TextStateFeature CSS uses hyphen-case.
+function hyphenToCamel(str: string): string {
+  return str.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
+}
 
 const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
   const { value, relationTo } = linkNode.fields.doc!
@@ -38,6 +47,34 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
   ...LinkJSXConverter({ internalDocToHref }),
+  text: (args) => {
+    const { node } = args
+
+    // Render standard formatting (bold, italic, etc.) using the default converter
+    let text =
+      typeof defaultConverters.text === 'function'
+        ? defaultConverters.text(args)
+        : node.text
+
+    // Apply TextStateFeature styles from the "$" key in the serialized node
+    const nodeState = (node as any)[NODE_STATE_KEY] as Record<string, string> | undefined
+    if (nodeState) {
+      const styles: React.CSSProperties = {}
+      for (const [stateKey, stateValue] of Object.entries(nodeState)) {
+        const css = (textStateConfig as any)[stateKey]?.[stateValue]?.css
+        if (css) {
+          for (const [prop, value] of Object.entries(css)) {
+            ;(styles as any)[hyphenToCamel(prop)] = value
+          }
+        }
+      }
+      if (Object.keys(styles).length > 0) {
+        text = <span style={styles}>{text}</span>
+      }
+    }
+
+    return text
+  },
   blocks: {
     banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} />,
     mediaBlock: ({ node }) => (
