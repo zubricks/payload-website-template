@@ -11,6 +11,16 @@ import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { Archive } from './blocks/ArchiveBlock/config'
+import { Banner } from './blocks/Banner/config'
+import { CallToAction } from './blocks/CallToAction/config'
+import { Code } from './blocks/Code/config'
+import { Content } from './blocks/Content/config'
+import { FormBlock } from './blocks/Form/config'
+import { MediaBlock } from './blocks/MediaBlock/config'
+import { ReusableContent } from './collections/ReusableContent'
+import { PageTemplates } from './collections/PageTemplates'
+import { ReusableContentBlock } from './blocks/ReusableContent/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
@@ -60,7 +70,8 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  blocks: [Archive, Banner, CallToAction, Code, Content, FormBlock, MediaBlock, ReusableContentBlock],
+  collections: [Pages, Posts, Media, Categories, Users, ReusableContent, PageTemplates],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,

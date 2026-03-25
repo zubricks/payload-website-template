@@ -2,11 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { Archive } from '../../blocks/ArchiveBlock/config'
-import { CallToAction } from '../../blocks/CallToAction/config'
-import { Content } from '../../blocks/Content/config'
-import { FormBlock } from '../../blocks/Form/config'
-import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -61,6 +56,17 @@ export const Pages: CollectionConfig<'pages'> = {
       required: true,
     },
     {
+      name: 'applyTemplate',
+      type: 'ui',
+      label: 'Page Template',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '@/components/TemplateSelector#TemplateSelector',
+        },
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -72,7 +78,15 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blockReferences: [
+                'cta',
+                'content',
+                'mediaBlock',
+                'archive',
+                'formBlock',
+                'reusableContentBlock',
+              ],
+              blocks: [],
               required: true,
               admin: {
                 initCollapsed: true,
