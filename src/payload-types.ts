@@ -299,6 +299,18 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  previewClip?: {
+    filename?: string | null;
+    filesize?: number | null;
+    mimeType?: string | null;
+    url?: string | null;
+  };
+  previewThumbnail?: {
+    filename?: string | null;
+    filesize?: number | null;
+    mimeType?: string | null;
+    url?: string | null;
+  };
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -1305,6 +1317,22 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  previewClip?:
+    | T
+    | {
+        filename?: T;
+        filesize?: T;
+        mimeType?: T;
+        url?: T;
+      };
+  previewThumbnail?:
+    | T
+    | {
+        filename?: T;
+        filesize?: T;
+        mimeType?: T;
+        url?: T;
+      };
   folder?: T;
   updatedAt?: T;
   createdAt?: T;

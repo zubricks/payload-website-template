@@ -3,6 +3,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
+import { videoPreviewPlugin } from '@zubricks/payload-plugin-video-preview'
 import { Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
@@ -24,6 +25,15 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 }
 
 export const plugins: Plugin[] = [
+  videoPreviewPlugin({
+    collections: ['media'],
+    clipOptions: { startTime: 0, duration: 15 },
+    thumbnailTime: 1,
+    vercelBlob: {
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      prefix: 'video-previews/',
+    },
+  }),
   redirectsPlugin({
     collections: ['pages', 'posts'],
     overrides: {

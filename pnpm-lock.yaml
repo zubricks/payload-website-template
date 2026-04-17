@@ -53,6 +53,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.2.4(@types/react@19.2.9)(react@19.2.1)
+      '@zubricks/payload-plugin-video-preview':
+        specifier: link:/Users/szubrickas/www/payload-plugin-video-preview
+        version: link:../payload-plugin-video-preview
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
