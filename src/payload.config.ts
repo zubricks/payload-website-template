@@ -86,6 +86,61 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [],
+    tasks: [
+      {
+        // Queued by the `notifySlack` afterChange hook on Posts.
+        // A single save can queue multiple jobs — one per condition that fired.
+        // Each job runs independently, so a failed Slack call for one event
+        // doesn't prevent the others from getting through.
+        slug: 'notifySlack',
+        inputSchema: [
+          { name: 'event', type: 'text', required: true },
+          { name: 'postTitle', type: 'text', required: true },
+          { name: 'postSlug', type: 'text', required: true },
+          { name: 'changedFrom', type: 'text' },
+          { name: 'changedTo', type: 'text' },
+        ],
+        outputSchema: [{ name: 'notified', type: 'checkbox' }],
+        handler: async ({
+          input,
+          req,
+        }: {
+          input: {
+            event: string
+            postTitle: string
+            postSlug: string
+            changedFrom?: string
+            changedTo?: string
+          }
+          req: PayloadRequest
+        }) => {
+          const webhookUrl = process.env.SLACK_WEBHOOK_URL
+
+          if (!webhookUrl) {
+            req.payload.logger.warn({ msg: 'SLACK_WEBHOOK_URL not set, skipping notification' })
+            return { output: { notified: false } }
+          }
+
+          const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? ''
+          const postUrl = `${siteUrl}/posts/${input.postSlug}`
+
+          const messages: Record<string, string> = {
+            post_published: `:rocket: *${input.postTitle}* was just published.\n${postUrl}`,
+            seo_title_changed: `:warning: SEO title changed on *${input.postTitle}*\n*From:* ${input.changedFrom}\n*To:* ${input.changedTo}\n${postUrl}`,
+            seo_description_changed: `:warning: Meta description changed on *${input.postTitle}*\n*From:* ${input.changedFrom}\n*To:* ${input.changedTo}\n${postUrl}`,
+          }
+
+          const text = messages[input.event] ?? `:bell: ${input.event} on *${input.postTitle}*`
+
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+          })
+
+          return { output: { notified: true } }
+        },
+      },
+    ],
   },
 })

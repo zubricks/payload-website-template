@@ -126,6 +126,7 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      notifySlack: TaskNotifySlack;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -256,6 +257,10 @@ export interface Post {
     description?: string | null;
   };
   publishedAt?: string | null;
+  /**
+   * Estimated reading time in minutes. Computed on read.
+   */
+  readingTime?: number | null;
   authors?: (string | User)[] | null;
   populatedAuthors?:
     | {
@@ -983,7 +988,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'notifySlack' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1016,7 +1021,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'notifySlack' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1279,6 +1284,7 @@ export interface PostsSelect<T extends boolean = true> {
         description?: T;
       };
   publishedAt?: T;
+  readingTime?: T;
   authors?: T;
   populatedAuthors?:
     | T
@@ -1857,6 +1863,22 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskNotifySlack".
+ */
+export interface TaskNotifySlack {
+  input: {
+    event: string;
+    postTitle: string;
+    postSlug: string;
+    changedFrom?: string | null;
+    changedTo?: string | null;
+  };
+  output: {
+    notified?: boolean | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

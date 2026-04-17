@@ -15,8 +15,11 @@ import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { addReadingTime } from './hooks/addReadingTime'
 import { populateAuthors } from './hooks/populateAuthors'
+import { notifySlack } from './hooks/notifySlack'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
+import { validateBeforePublish } from './hooks/validateBeforePublish'
 
 import {
   MetaDescriptionField,
@@ -182,6 +185,21 @@ export const Posts: CollectionConfig<'posts'> = {
       },
     },
     {
+      // Populated by the `addReadingTime` afterRead hook — never stored in the database.
+      // The access control below prevents writes; the hook is the sole source of this value.
+      name: 'readingTime',
+      type: 'number',
+      admin: {
+        description: 'Estimated reading time in minutes. Computed on read.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      access: {
+        create: () => false,
+        update: () => false,
+      },
+    },
+    {
       name: 'authors',
       type: 'relationship',
       admin: {
@@ -217,8 +235,9 @@ export const Posts: CollectionConfig<'posts'> = {
     slugField(),
   ],
   hooks: {
-    afterChange: [revalidatePost],
-    afterRead: [populateAuthors],
+    beforeChange: [validateBeforePublish],
+    afterChange: [revalidatePost, notifySlack],
+    afterRead: [populateAuthors, addReadingTime],
     afterDelete: [revalidateDelete],
   },
   versions: {
